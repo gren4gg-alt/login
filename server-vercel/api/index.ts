@@ -5,7 +5,19 @@ import authRoutes from "../src/routes/auth.js";
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || "*" }));
+const corsOptions = {
+  // 1. MUST match your Vite dev URL (http://localhost:5173) or production frontend URL exactly
+  // Do NOT include trailing slashes (e.g., use "http://localhost:5173", not "http://localhost:5173/")
+  origin: process.env.CLIENT_ORIGIN || "http://localhost:5173", 
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200, // Important for legacy browser support on preflight requests
+};
+
+// Apply CORS globally to handle headers and preflight checks across all routes
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
 app.use(express.json());
 
 app.get("/api/health", (_req, res) => {
@@ -14,6 +26,4 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 
-// No app.listen() here — Vercel invokes this exported handler per-request
-// instead of running a persistent server process.
 export default app;
